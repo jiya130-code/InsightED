@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0f1a">
+<title>InsightED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+:root{
+  --bg:#0d0a14;--surface:#13101e;--card:#1a1628;--card2:#201b32;
+  --border:#2e2545;--a1:#c44ff7;--a2:#ff6b9d;--a3:#ff9f43;--a4:#f75f7a;--a5:#9b59f5;
+  --text:#f0eafa;--muted:#7a6a96;--soft:#b8a8d4;
+  --grad-primary:linear-gradient(135deg,#9b59f5,#e0416a,#ff9f43);
+  --grad-accent:linear-gradient(135deg,#c44ff7,#ff6b9d);
+  --font:'Sora',sans-serif;--mono:'Space Mono',monospace;
+  --r:12px;--rr:16px;
+  --nav-h:60px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html,body{
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:15px;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(155,89,245,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 10% 90%, rgba(224,65,106,0.06) 0%, transparent 55%);
+  pointer-events:none;z-index:0;
+}
+
+/* ═══════════════════════════════
+   TOP BAR (logo + live pill)
+═══════════════════════════════ */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  height:calc(var(--nav-h) + var(--safe-top));
+  padding-top:var(--safe-top);
+  background:rgba(13,10,20,0.97);
+  border-bottom:1px solid rgba(155,89,245,0.2);
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.logo{font-size:1.1rem;font-weight:700;letter-spacing:-0.5px;display:flex;align-items:center;gap:9px}
+.logo-svg{width:28px;height:28px;flex-shrink:0}
+.logo-text{background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:var(--a2);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0.6}}
+.live-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(196,79,247,0.1);border:1px solid rgba(196,79,247,0.3);border-radius:20px;font-size:11px;color:var(--a1);font-weight:500}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--a1);animation:pulse 1.5s infinite}
+
+/* ═══════════════════════════════
+   HORIZONTAL TAB NAV (top, below logo bar)
+═══════════════════════════════ */
+.top-nav{
+  display:flex;
+  background:rgba(13,10,20,0.98);
+  border-bottom:1px solid rgba(155,89,245,0.15);
+  position:fixed;
+  top:calc(var(--nav-h) + var(--safe-top));
+  left:0;right:0;z-index:199;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.top-nav::-webkit-scrollbar{display:none}
+
+.tnav-btn{
+  flex:1;min-width:64px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:9px 6px;
+  background:none;border:none;
+  color:var(--muted);
+  font-family:var(--font);font-size:10px;font-weight:500;
+  cursor:pointer;
+  transition:color 0.2s,background 0.2s;
+  position:relative;
+  white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  min-height:48px;
+}
+.tnav-btn::after{
+  content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;
+  background:var(--grad-accent);border-radius:2px 2px 0 0;
+  opacity:0;transform:scaleX(0);
+  transition:opacity 0.2s,transform 0.2s;
+}
+.tnav-btn.active{color:var(--a1)}
+.tnav-btn.active::after{opacity:1;transform:scaleX(1)}
+.tnav-icon{font-size:16px;line-height:1}
+
+/* ═══════════════════════════════
+   PAGE CONTENT AREA
+═══════════════════════════════ */
+.pages-wrap{
+  position:fixed;
+  top:calc(var(--nav-h) + var(--safe-top) + 49px);
+  left:0;right:0;
+  bottom:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+}
+
+.page{display:none;animation:fadeUp 0.22s ease;min-height:100%}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.scroll-wrap{
+  padding:16px;
+  padding-bottom:calc(24px + var(--safe-bottom));
+  max-width:680px;
+  margin:0 auto;
+}
+
+/* ═══════════════════════════════
+   HOME
+═══════════════════════════════ */
+.hero{text-align:center;padding:20px 0 16px}
+.hero-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;background:rgba(196,79,247,0.1);border:1px solid rgba(196,79,247,0.3);border-radius:20px;font-size:11px;color:var(--a1);font-weight:500;margin-bottom:14px}
+.hero h1{font-size:clamp(1.6rem,7vw,2.6rem);font-weight:700;letter-spacing:-1px;line-height:1.15;margin-bottom:10px}
+.hero h1 span{
+  background:var(--grad-primary);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{font-size:13px;color:var(--soft);line-height:1.7;max-width:320px;margin:0 auto 20px}
+
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.role-card{
+  padding:18px 14px;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:var(--rr);
+  cursor:pointer;text-align:left;
+  transition:all 0.2s;
+  position:relative;overflow:hidden;
+  min-height:44px;
+}
+.role-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 60%,rgba(255,255,255,0.03));
+  pointer-events:none;
+}
+.role-card:active{transform:scale(0.96)}
+.role-card.student:hover,.role-card.student:focus{border-color:var(--a1);background:rgba(196,79,247,0.07)}
+.role-card.teacher:hover,.role-card.teacher:focus{border-color:var(--a3);background:rgba(255,159,67,0.07)}
+.rc-icon{font-size:22px;margin-bottom:8px;display:block}
+.rc-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.rc-sub{font-size:11px;color:var(--muted)}
+.rc-arr{position:absolute;bottom:12px;right:12px;font-size:13px;color:var(--muted)}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat-box{
+  text-align:center;padding:14px 8px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  position:relative;overflow:hidden;
+}
+.stat-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-box:nth-child(1)::after{background:var(--a1)}
+.stat-box:nth-child(2)::after{background:var(--a3)}
+.stat-box:nth-child(3)::after{background:var(--a2)}
+.stat-n{font-size:1.35rem;font-weight:700;font-family:var(--mono)}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px}
+
+/* ═══════════════════════════════
+   SECTION HEADER
+═══════════════════════════════ */
+.sec-hd{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-hd h2{font-size:1.15rem;font-weight:700;letter-spacing:-0.3px}
+.sec-hd p{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ═══════════════════════════════
+   FORMS
+═══════════════════════════════ */
+.field-label{font-size:12px;font-weight:500;color:var(--soft);display:block;margin-bottom:6px}
+.styled-select{
+  width:100%;padding:11px 12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--font);font-size:14px;
+  cursor:pointer;appearance:none;-webkit-appearance:none;outline:none;margin-bottom:14px;
+}
+.styled-select:focus{border-color:var(--a1)}
+.styled-input{
+  width:100%;padding:11px 12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--font);font-size:14px;outline:none;
+  transition:border 0.2s;
+  -webkit-appearance:none;
+}
+.styled-input:focus{border-color:var(--a1)}
+.styled-input::placeholder{color:var(--muted)}
+
+/* ═══════════════════════════════
+   FEEDBACK GRID
+═══════════════════════════════ */
+.fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.fb-btn{
+  padding:14px 10px;border-radius:var(--r);
+  border:1.5px solid var(--border);background:var(--card);
+  cursor:pointer;font-family:var(--font);
+  transition:all 0.18s;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-height:80px;touch-action:manipulation;
+}
+.fb-btn:active{transform:scale(0.95)}
+.fb-em{font-size:22px;line-height:1}
+.fb-lbl{font-size:12px;font-weight:600;color:var(--text)}
+.fb-dsc{font-size:10px;color:var(--muted);text-align:center;line-height:1.4}
+.fb-btn.understood.sel{border-color:var(--a3);background:rgba(255,159,67,0.1);box-shadow:0 0 0 1px rgba(255,159,67,0.2)}
+.fb-btn.confused.sel{border-color:var(--a2);background:rgba(255,107,157,0.1);box-shadow:0 0 0 1px rgba(255,107,157,0.2)}
+.fb-btn.doubt.sel{border-color:var(--a1);background:rgba(196,79,247,0.1);box-shadow:0 0 0 1px rgba(196,79,247,0.2)}
+.fb-btn.lost.sel{border-color:var(--a4);background:rgba(247,95,122,0.1);box-shadow:0 0 0 1px rgba(247,95,122,0.2)}
+
+.fb-note{
+  width:100%;padding:11px 12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--font);font-size:14px;
+  resize:vertical;min-height:72px;outline:none;margin-bottom:12px;
+  transition:border 0.2s;-webkit-appearance:none;
+}
+.fb-note:focus{border-color:var(--a1)}
+.fb-note::placeholder{color:var(--muted)}
+
+.send-btn{
+  width:100%;padding:15px;
+  background:var(--grad-primary);
+  border:none;border-radius:var(--r);
+  color:#fff;font-family:var(--font);font-size:15px;font-weight:600;
+  cursor:pointer;transition:all 0.18s;min-height:48px;
+  touch-action:manipulation;
+  box-shadow:0 4px 20px rgba(196,79,247,0.3);
+}
+.send-btn:active{transform:scale(0.98);box-shadow:none}
+
+/* ═══════════════════════════════
+   MINI FEED
+═══════════════════════════════ */
+.mini-feed{margin-top:18px}
+.mf-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.mf-list{display:flex;flex-direction:column;gap:6px}
+.mf-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);font-size:12px;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.tag{padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0}
+.tag.understood{background:rgba(255,159,67,0.15);color:var(--a3)}
+.tag.confused{background:rgba(255,107,157,0.15);color:var(--a2)}
+.tag.doubt{background:rgba(196,79,247,0.15);color:var(--a1)}
+.tag.lost{background:rgba(247,95,122,0.15);color:var(--a4)}
+.mf-text{flex:1;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mf-time{color:var(--muted);font-size:10px;font-family:var(--mono);flex-shrink:0}
+
+/* ═══════════════════════════════
+   MANAGE SUBJECTS
+═══════════════════════════════ */
+.subj-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.subj-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+}
+.subj-name{font-size:14px;font-weight:500}
+.subj-lec{font-size:11px;color:var(--muted);margin-top:2px}
+.subj-del{
+  padding:5px 11px;background:rgba(247,95,122,0.1);
+  border:1px solid rgba(247,95,122,0.25);border-radius:8px;
+  color:var(--a4);font-size:11px;cursor:pointer;font-family:var(--font);
+  min-height:32px;touch-action:manipulation;
+}
+.add-subj-row{display:flex;gap:8px}
+.add-subj-row .styled-input{flex:1;margin-bottom:0}
+.add-btn{
+  padding:10px 16px;background:var(--grad-accent);
+  border:none;border-radius:var(--r);
+  color:#fff;font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;white-space:nowrap;min-height:44px;
+  touch-action:manipulation;
+}
+.add-btn:active{transform:scale(0.96)}
+
+/* ═══════════════════════════════
+   DASHBOARD
+═══════════════════════════════ */
+.dash-filter-row{
+  display:flex;gap:6px;overflow-x:auto;
+  padding-bottom:4px;margin-bottom:14px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.dash-filter-row::-webkit-scrollbar{display:none}
+.chip{
+  padding:6px 13px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:var(--font);font-size:12px;
+  cursor:pointer;transition:all 0.18s;white-space:nowrap;min-height:36px;
+  touch-action:manipulation;
+}
+.chip.active{background:var(--a1);border-color:var(--a1);color:#fff}
+.chip:active{transform:scale(0.95)}
+
+.metrics-2x2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.m-card{
+  padding:14px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);position:relative;overflow:hidden;
+}
+.m-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2.5px;border-radius:0}
+.m-card.mu::after{background:var(--a3)}
+.m-card.mc::after{background:var(--a2)}
+.m-card.md::after{background:var(--a1)}
+.m-card.ml::after{background:var(--a4)}
+.m-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.m-num{font-size:1.6rem;font-weight:700;font-family:var(--mono)}
+.m-num.u{color:var(--a3)}.m-num.c{color:var(--a2)}.m-num.d{color:var(--a1)}.m-num.l{color:var(--a4)}
+.m-pct{font-size:11px;color:var(--muted);margin-top:2px}
+
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.cc-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.b{width:100%;border-radius:4px 4px 0 0;transition:height 0.7s cubic-bezier(0.34,1.56,0.64,1);min-height:3px}
+.b.u{background:var(--a3)}.b.c{background:var(--a2)}.b.d{background:var(--a1)}.b.l{background:var(--a4)}
+.bv{font-size:10px;font-family:var(--mono);color:var(--soft)}
+.bl{font-size:9px;color:var(--muted)}
+
+.score-row{display:flex;align-items:center;gap:16px}
+.ring-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--a1)}
+.ring-sub{font-size:8px;color:var(--muted)}
+.legend-col{display:flex;flex-direction:column;gap:6px;flex:1}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.leg-name{color:var(--soft);flex:1}
+.leg-pct{color:var(--muted);font-family:var(--mono);font-size:10px}
+
+.subj-compare{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.sc-row{display:flex;align-items:center;gap:8px}
+.sc-name{font-size:12px;color:var(--soft);width:80px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-bar-bg{flex:1;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+.sc-bar{height:100%;border-radius:3px;transition:width 0.7s ease}
+.sc-pct{font-size:10px;color:var(--muted);font-family:var(--mono);width:28px;text-align:right}
+
+.alert-box{display:none;padding:10px 12px;background:rgba(247,95,122,0.1);border:1px solid rgba(247,95,122,0.25);border-radius:var(--r);color:#f8a5b5;font-size:12px;margin-bottom:10px;align-items:center;gap:8px}
+.alert-box.show{display:flex}
+
+.lfc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.lfc-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+.lf-list{display:flex;flex-direction:column;gap:6px}
+.lf-item{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-size:12px;animation:slideIn 0.3s ease}
+.lf-meta{flex:1;min-width:0}
+.lf-top{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.lf-user{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.lf-subj{font-size:10px;color:var(--a1);background:rgba(196,79,247,0.1);padding:1px 5px;border-radius:4px}
+.lf-note{color:var(--soft);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lf-time{font-size:10px;color:var(--muted);font-family:var(--mono);flex-shrink:0;margin-top:1px}
+
+.my-fb-section{margin-top:10px}
+.my-fb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.my-fb-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--a1);padding:3px 8px;background:rgba(196,79,247,0.1);border-radius:10px;border:1px solid rgba(196,79,247,0.2)}
+.my-fb-list{display:flex;flex-direction:column;gap:6px}
+.my-fb-item{padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.my-fb-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.my-fb-note{font-size:11px;color:var(--muted)}
+
+/* ═══════════════════════════════
+   SETUP
+═══════════════════════════════ */
+.setup-info{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.8}
+.setup-info code{background:var(--card2);padding:1px 5px;border-radius:4px;font-family:var(--mono);color:var(--a1);font-size:11px}
+.cfg-row{margin-bottom:12px}
+.cfg-row label{font-size:12px;font-weight:500;color:var(--soft);display:block;margin-bottom:5px}
+.connect-btn{
+  padding:12px 20px;background:var(--grad-primary);
+  border:none;border-radius:var(--r);color:#fff;font-family:var(--font);
+  font-size:14px;font-weight:600;cursor:pointer;min-height:48px;
+  box-shadow:0 4px 16px rgba(196,79,247,0.25);touch-action:manipulation;
+}
+.connect-btn:active{transform:scale(0.97)}
+.fb-status{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:11px;margin-left:8px;font-weight:500}
+.fb-status.conn{background:rgba(255,159,67,0.1);color:var(--a3)}
+.fb-status.disconn{background:rgba(247,95,122,0.1);color:var(--a4)}
+.demo-btn{
+  padding:12px 18px;background:transparent;
+  border:1px solid var(--border);border-radius:var(--r);
+  color:var(--soft);font-family:var(--font);font-size:13px;
+  cursor:pointer;min-height:44px;margin-top:12px;width:100%;
+  touch-action:manipulation;
+}
+.demo-btn:active{background:var(--card)}
+
+/* ═══════════════════════════════
+   TOAST
+═══════════════════════════════ */
+.toast-wrap{
+  position:fixed;
+  bottom:calc(20px + var(--safe-bottom));
+  left:0;right:0;
+  display:flex;justify-content:center;
+  pointer-events:none;z-index:300;
+}
+.toast{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--a1);color:#fff;
+  padding:11px 22px;border-radius:50px;
+  font-weight:600;font-size:13px;
+  transform:translateY(80px);opacity:0;
+  transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;max-width:90vw;text-align:center;
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ═══════════════════════════════
+   BADGE on tab
+═══════════════════════════════ */
+.tnav-badge{
+  position:absolute;top:7px;right:calc(50% - 18px);
+  width:6px;height:6px;border-radius:50%;
+  background:var(--a1);display:none;
+}
+.tnav-btn.has-badge .tnav-badge{display:block}
+</style>
+</head>
+<body>
+
+<!-- TOP LOGO BAR -->
+<div class="top-bar">
+  <div class="logo">
+    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#9b59f5"/>
+          <stop offset="50%" stop-color="#e0416a"/>
+          <stop offset="100%" stop-color="#ff9f43"/>
+        </linearGradient>
+        <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#9b59f5"/>
+          <stop offset="100%" stop-color="#e0416a"/>
+        </linearGradient>
+      </defs>
+      <!-- arc -->
+      <path d="M20,58 A36,36 0 1,1 82,46" fill="none" stroke="url(#lg1)" stroke-width="5.5" stroke-linecap="round"/>
+      <!-- bar chart bars -->
+      <rect x="46" y="28" width="8" height="18" rx="3" fill="#e0416a"/>
+      <rect x="58" y="20" width="8" height="26" rx="3" fill="#ff9f43"/>
+      <!-- circuit nodes -->
+      <line x1="30" y1="52" x2="18" y2="48" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="18" y1="48" x2="10" y2="42" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="18" y1="48" x2="10" y2="54" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="18" y1="48" x2="10" y2="60" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="10" cy="42" r="3" fill="none" stroke="#9b59f5" stroke-width="2.5"/>
+      <circle cx="10" cy="54" r="3" fill="none" stroke="#9b59f5" stroke-width="2.5"/>
+      <circle cx="10" cy="60" r="3" fill="none" stroke="#9b59f5" stroke-width="2.5"/>
+      <!-- eye shape -->
+      <path d="M28,65 Q50,45 72,65 Q50,85 28,65 Z" fill="#1a0f2a" stroke="#1a1020" stroke-width="1"/>
+      <path d="M28,65 Q50,50 72,65" fill="none" stroke="#13101e" stroke-width="2"/>
+      <!-- eye lashes -->
+      <path d="M70,62 Q80,56 84,54" fill="none" stroke="#1a0f2a" stroke-width="5" stroke-linecap="round"/>
+      <!-- iris gradient -->
+      <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#1a0030"/>
+        <stop offset="40%" stop-color="#c44ff7"/>
+        <stop offset="70%" stop-color="#e0416a"/>
+        <stop offset="100%" stop-color="#ff9f43"/>
+      </radialGradient>
+      <circle cx="50" cy="65" r="13" fill="url(#iris)"/>
+      <circle cx="50" cy="65" r="7" fill="#0d0a14"/>
+      <circle cx="54" cy="61" r="2.5" fill="white" opacity="0.8"/>
+    </svg>
+    <span class="logo-text">InsightED</span>
+  </div>
+  <div class="live-pill"><div class="live-dot"></div>Live</div>
+</div>
+
+<!-- TOP TAB NAV -->
+<nav class="top-nav">
+  <button class="tnav-btn active" id="tnav-home" onclick="goPage('home')">
+    <span class="tnav-icon">🏠</span>Home
+  </button>
+  <button class="tnav-btn" id="tnav-dashboard" onclick="goPage('dashboard')">
+    <span class="tnav-icon">📊</span>Dashboard
+  </button>
+  <button class="tnav-btn" id="tnav-student" onclick="goPage('student')">
+    <span class="tnav-icon">📝</span>Feedback
+  </button>
+  <button class="tnav-btn" id="tnav-subjects" onclick="goPage('subjects')">
+    <span class="tnav-icon">📚</span>Subjects
+  </button>
+  <button class="tnav-btn" id="tnav-setup" onclick="goPage('setup')">
+    <span class="tnav-icon">⚙️</span>Settings
+  </button>
+</nav>
+
+<!-- SCROLLABLE PAGE AREA -->
+<div class="pages-wrap">
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="scroll-wrap">
+      <div class="hero">
+        <div class="hero-chip">🎓 Real-time Classroom Intelligence</div>
+        <h1>Know What Your<br><span>Students Think</span></h1>
+        <p>Live feedback from every student, every subject, all in one dashboard.</p>
+        <div class="role-cards">
+          <div class="role-card student" onclick="goPage('student')">
+            <span class="rc-icon">👨‍🎓</span>
+            <div class="rc-title">I'm a Student</div>
+            <div class="rc-sub">Send live feedback</div>
+            <div class="rc-arr">↗</div>
+          </div>
+          <div class="role-card teacher" onclick="goPage('dashboard')">
+            <span class="rc-icon">👩‍🏫</span>
+            <div class="rc-title">I'm a Teacher</div>
+            <div class="rc-sub">View live analytics</div>
+            <div class="rc-arr">↗</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-n" id="h-total" style="color:var(--a1)">0</div>
+          <div class="stat-l">Responses</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n" id="h-score" style="color:var(--a3)">–</div>
+          <div class="stat-l">Understanding</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n" id="h-subjs" style="color:var(--a2)">0</div>
+          <div class="stat-l">Subjects</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div class="scroll-wrap">
+      <div class="sec-hd"><h2>Live Dashboard</h2><p>Real-time classroom understanding across all subjects</p></div>
+      <div class="dash-filter-row" id="dash-filters">
+        <button class="chip active" onclick="setFilter('all',this)">All Subjects</button>
+      </div>
+      <div class="alert-box" id="alert-box">
+        <span style="font-size:14px">⚠️</span><span id="alert-txt"></span>
+      </div>
+      <div class="metrics-2x2">
+        <div class="m-card mu"><div class="m-lbl">Understood</div><div class="m-num u" id="d-u">0</div><div class="m-pct" id="dp-u">0%</div></div>
+        <div class="m-card mc"><div class="m-lbl">Confused</div><div class="m-num c" id="d-c">0</div><div class="m-pct" id="dp-c">0%</div></div>
+        <div class="m-card md"><div class="m-lbl">Has Doubt</div><div class="m-num d" id="d-d">0</div><div class="m-pct" id="dp-d">0%</div></div>
+        <div class="m-card ml"><div class="m-lbl">Lost</div><div class="m-num l" id="d-l">0</div><div class="m-pct" id="dp-l">0%</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-title">Response breakdown</div>
+        <div class="bar-chart">
+          <div class="bw"><div class="bv" id="bv-u">0</div><div class="b u" id="bar-u" style="height:0%"></div><div class="bl">Got it</div></div>
+          <div class="bw"><div class="bv" id="bv-c">0</div><div class="b c" id="bar-c" style="height:0%"></div><div class="bl">Confused</div></div>
+          <div class="bw"><div class="bv" id="bv-d">0</div><div class="b d" id="bar-d" style="height:0%"></div><div class="bl">Doubt</div></div>
+          <div class="bw"><div class="bv" id="bv-l">0</div><div class="b l" id="bar-l" style="height:0%"></div><div class="bl">Lost</div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-title">Understanding score</div>
+        <div class="score-row">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 80 80" width="80" height="80" style="transform:rotate(-90deg)">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#9b59f5"/>
+                  <stop offset="50%" stop-color="#e0416a"/>
+                  <stop offset="100%" stop-color="#ff9f43"/>
+                </linearGradient>
+              </defs>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="var(--surface)" stroke-width="10"/>
+              <circle cx="40" cy="40" r="30" fill="none" stroke="url(#ringGrad)" stroke-width="10" stroke-dasharray="188.5" id="ring-arc" stroke-dashoffset="188.5" stroke-linecap="round" style="transition:stroke-dashoffset 0.7s ease"/>
+            </svg>
+            <div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-sub">score</div></div>
+          </div>
+          <div class="legend-col">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--a3)"></div><span class="leg-name">Understood</span><span class="leg-pct" id="lp-u">0%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--a2)"></div><span class="leg-name">Confused</span><span class="leg-pct" id="lp-c">0%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--a1)"></div><span class="leg-name">Doubt</span><span class="leg-pct" id="lp-d">0%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--a4)"></div><span class="leg-name">Lost</span><span class="leg-pct" id="lp-l">0%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-title">Understanding by subject</div>
+        <div class="subj-compare" id="subj-compare"></div>
+      </div>
+      <div class="chart-card">
+        <div class="lfc-header">
+          <div class="lfc-title">All student responses</div>
+          <div class="live-pill" style="font-size:10px"><div class="live-dot"></div>Live</div>
+        </div>
+        <div class="lf-list" id="lf-list"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="my-fb-section">
+        <div class="my-fb-header">
+          <div class="lfc-title">My feedback history</div>
+          <div class="my-fb-badge">👤 Mine only</div>
+        </div>
+        <div class="my-fb-list" id="my-fb-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT / FEEDBACK -->
+  <div class="page" id="page-student">
+    <div class="scroll-wrap">
+      <div class="sec-hd"><h2>Send Feedback</h2><p>Tell your teacher how you're following along</p></div>
+      <label class="field-label">Subject</label>
+      <select class="styled-select" id="st-subject"></select>
+      <label class="field-label">Lecture / Topic</label>
+      <select class="styled-select" id="st-lecture"></select>
+      <label class="field-label" style="margin-bottom:8px">How are you feeling?</label>
+      <div class="fb-grid">
+        <button class="fb-btn understood" onclick="selFb('understood',this)">
+          <span class="fb-em">✅</span><span class="fb-lbl">Got it!</span><span class="fb-dsc">I understand completely</span>
+        </button>
+        <button class="fb-btn confused" onclick="selFb('confused',this)">
+          <span class="fb-em">🤔</span><span class="fb-lbl">A bit confused</span><span class="fb-dsc">Slightly lost</span>
+        </button>
+        <button class="fb-btn doubt" onclick="selFb('doubt',this)">
+          <span class="fb-em">❓</span><span class="fb-lbl">I have a doubt</span><span class="fb-dsc">Specific question</span>
+        </button>
+        <button class="fb-btn lost" onclick="selFb('lost',this)">
+          <span class="fb-em">🆘</span><span class="fb-lbl">Totally lost</span><span class="fb-dsc">Please slow down</span>
+        </button>
+      </div>
+      <textarea class="fb-note" id="fb-note" placeholder="Optional: type your question or comment..."></textarea>
+      <button class="send-btn" onclick="sendFeedback()">Send Feedback →</button>
+      <div class="mini-feed" id="mini-feed">
+        <div class="mf-title">Your recent responses</div>
+        <div class="mf-list" id="mf-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBJECTS -->
+  <div class="page" id="page-subjects">
+    <div class="scroll-wrap">
+      <div class="sec-hd"><h2>Manage Subjects</h2><p>Add subjects and their lectures for the class</p></div>
+      <div class="subj-list" id="subj-list"></div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;font-weight:500;color:var(--soft);margin-bottom:8px">Add new subject</div>
+        <div class="add-subj-row" style="margin-bottom:8px">
+          <input class="styled-input" id="new-subj" placeholder="Subject name (e.g. Physics)" />
+          <button class="add-btn" onclick="addSubject()">Add</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="lec-manager"></div>
+    </div>
+  </div>
+
+  <!-- SETUP / SETTINGS -->
+  <div class="page" id="page-setup">
+    <div class="scroll-wrap">
+      <div class="sec-hd"><h2>Firebase Setup</h2><p>Connect your own database for real multi-device sync</p></div>
+      <div class="setup-info">
+        1. Go to <code>console.firebase.google.com</code><br>
+        2. Create project → Realtime Database<br>
+        3. Set rules: <code>.read:true, .write:true</code><br>
+        4. Copy config values below and hit Connect
+      </div>
+      <div class="cfg-row"><label>API Key</label><input class="styled-input" id="cfg-key" placeholder="AIzaSy..."/></div>
+      <div class="cfg-row"><label>Database URL</label><input class="styled-input" id="cfg-url" placeholder="https://your-project.firebaseio.com"/></div>
+      <div class="cfg-row"><label>Project ID</label><input class="styled-input" id="cfg-pid" placeholder="your-project-id"/></div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px">
+        <button class="connect-btn" onclick="connectFb()">Connect Firebase</button>
+        <div class="fb-status disconn" id="fb-st">● Not connected</div>
+      </div>
+      <div class="divider"></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">No Firebase yet? App works fully with local demo data.</p>
+      <button class="demo-btn" onclick="loadDemo()">Load Demo Data</button>
+    </div>
+  </div>
+
+</div><!-- end pages-wrap -->
+
+<div class="toast-wrap"><div class="toast" id="toast">Sent!</div></div>
+
+<script>
+const STORAGE_KEY='insighted_v2';
+const SUBJ_KEY='insighted_subjects';
+const MY_ID='user_'+Math.random().toString(36).slice(2,8);
+
+let allFeedback=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+let subjects=JSON.parse(localStorage.getItem(SUBJ_KEY)||'null')||[
+  {id:'s1',name:'Mathematics',lectures:['Lecture 1 – Limits','Lecture 2 – Derivatives','Lecture 3 – Integration']},
+  {id:'s2',name:'Physics',lectures:['Lecture 1 – Motion','Lecture 2 – Forces','Lecture 3 – Energy']},
+  {id:'s3',name:'Computer Science',lectures:['Lecture 1 – Arrays','Lecture 2 – Linked Lists','Lecture 3 – Recursion']}
+];
+let selectedType=null;
+let currentFilter='all';
+let fbConnected=false;
+
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(allFeedback));
+  localStorage.setItem(SUBJ_KEY,JSON.stringify(subjects));
+}
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const btn=document.getElementById('tnav-'+id);
+  if(btn)btn.classList.add('active');
+  // Scroll the pages-wrap back to top
+  document.querySelector('.pages-wrap').scrollTop=0;
+  if(id==='student')populateStudentSelects();
+  if(id==='dashboard'){populateDashFilters();updateDashboard();}
+  if(id==='subjects')renderSubjects();
+  if(id==='home')updateHomeStats();
+}
+
+function populateStudentSelects(){
+  const ss=document.getElementById('st-subject');
+  ss.innerHTML=subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  ss.onchange=()=>populateLectures();
+  populateLectures();
+}
+function populateLectures(){
+  const sid=document.getElementById('st-subject').value;
+  const subj=subjects.find(s=>s.id===sid);
+  const sl=document.getElementById('st-lecture');
+  sl.innerHTML=(subj?subj.lectures:[]).map((l,i)=>`<option value="${i}">${l}</option>`).join('');
+}
+
+function selFb(type,btn){
+  document.querySelectorAll('.fb-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedType=type;
+}
+
+function sendFeedback(){
+  if(!selectedType){showToast('Pick a feeling first!','var(--a4)');return;}
+  const sid=document.getElementById('st-subject').value;
+  const subj=subjects.find(s=>s.id===sid);
+  const li=parseInt(document.getElementById('st-lecture').value)||0;
+  const lec=subj?subj.lectures[li]:'';
+  const note=document.getElementById('fb-note').value.trim();
+  const entry={id:'fb_'+Date.now(),type:selectedType,note,subjectId:sid,subjectName:subj?subj.name:'',lecture:lec,userId:MY_ID,time:Date.now()};
+  allFeedback.push(entry);save();
+  showToast('Feedback sent! 🎉','var(--a1)');
+  addToMiniList(entry);
+  document.querySelectorAll('.fb-btn').forEach(b=>b.classList.remove('sel'));
+  selectedType=null;
+  document.getElementById('fb-note').value='';
+  updateHomeStats();
+}
+
+function addToMiniList(e){
+  const list=document.getElementById('mf-list');
+  const item=document.createElement('div');item.className='mf-item';
+  const t=fmtTime(e.time);
+  item.innerHTML=`<span class="tag ${e.type}">${e.type}</span><span class="mf-text">${e.lecture||e.subjectName}</span><span class="mf-time">${t}</span>`;
+  list.insertBefore(item,list.firstChild);
+  if(list.children.length>6)list.removeChild(list.lastChild);
+}
+
+function fmtTime(ts){const d=new Date(ts);return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
+
+function populateDashFilters(){
+  const row=document.getElementById('dash-filters');
+  row.innerHTML=`<button class="chip ${currentFilter==='all'?'active':''}" onclick="setFilter('all',this)">All Subjects</button>`;
+  subjects.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='chip'+(currentFilter===s.id?' active':'');
+    b.textContent=s.name;
+    b.onclick=function(){setFilter(s.id,this);};
+    row.appendChild(b);
+  });
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.dash-filter-row .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  updateDashboard();
+}
+
+function getFiltered(){
+  if(currentFilter==='all')return allFeedback;
+  return allFeedback.filter(f=>f.subjectId===currentFilter);
+}
+
+function updateDashboard(){
+  const data=getFiltered();
+  const counts={understood:0,confused:0,doubt:0,lost:0};
+  data.forEach(f=>{if(counts[f.type]!==undefined)counts[f.type]++;});
+  const total=data.length||1;
+
+  document.getElementById('d-u').textContent=counts.understood;
+  document.getElementById('d-c').textContent=counts.confused;
+  document.getElementById('d-d').textContent=counts.doubt;
+  document.getElementById('d-l').textContent=counts.lost;
+  document.getElementById('dp-u').textContent=Math.round(counts.understood/total*100)+'%';
+  document.getElementById('dp-c').textContent=Math.round(counts.confused/total*100)+'%';
+  document.getElementById('dp-d').textContent=Math.round(counts.doubt/total*100)+'%';
+  document.getElementById('dp-l').textContent=Math.round(counts.lost/total*100)+'%';
+
+  const maxV=Math.max(...Object.values(counts),1);
+  const bmap={understood:'u',confused:'c',doubt:'d',lost:'l'};
+  Object.keys(bmap).forEach(t=>{
+    const k=bmap[t];
+    const h=Math.round(counts[t]/maxV*100);
+    document.getElementById('bar-'+k).style.height=h+'%';
+    document.getElementById('bv-'+k).textContent=counts[t];
+  });
+
+  const score=Math.round(counts.understood/total*100);
+  document.getElementById('ring-pct').textContent=score+'%';
+  const arc=188.5;
+  document.getElementById('ring-arc').style.strokeDashoffset=arc-(score/100)*arc;
+
+  document.getElementById('lp-u').textContent=Math.round(counts.understood/total*100)+'%';
+  document.getElementById('lp-c').textContent=Math.round(counts.confused/total*100)+'%';
+  document.getElementById('lp-d').textContent=Math.round(counts.doubt/total*100)+'%';
+  document.getElementById('lp-l').textContent=Math.round(counts.lost/total*100)+'%';
+
+  const cp=(counts.confused+counts.lost)/total;
+  const ab=document.getElementById('alert-box');
+  if(cp>0.4&&data.length>2){ab.classList.add('show');document.getElementById('alert-txt').textContent=Math.round(cp*100)+'% of students are confused or lost — consider pausing!';}
+  else ab.classList.remove('show');
+
+  updateSubjectCompare();
+  updateLiveFeed(data);
+  updateMyFeed();
+}
+
+function updateSubjectCompare(){
+  const container=document.getElementById('subj-compare');
+  if(!subjects.length){container.innerHTML='<div style="font-size:12px;color:var(--muted)">No subjects yet</div>';return;}
+  const colors=['var(--a2)','var(--a1)','var(--a3)','var(--a5)','var(--a4)'];
+  container.innerHTML=subjects.map((s,i)=>{
+    const sfb=allFeedback.filter(f=>f.subjectId===s.id);
+    const total=sfb.length||1;
+    const u=sfb.filter(f=>f.type==='understood').length;
+    const pct=Math.round(u/total*100);
+    const color=colors[i%colors.length];
+    return `<div class="sc-row">
+      <div class="sc-name" title="${s.name}">${s.name}</div>
+      <div class="sc-bar-bg"><div class="sc-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="sc-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function updateLiveFeed(data){
+  const list=document.getElementById('lf-list');
+  const recent=[...data].sort((a,b)=>b.time-a.time).slice(0,10);
+  if(!recent.length){list.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">No feedback yet</div>';return;}
+  const lbls={understood:'Got it',confused:'Confused',doubt:'Has doubt',lost:'Lost'};
+  list.innerHTML=recent.map(f=>{
+    const isMe=f.userId===MY_ID;
+    return `<div class="lf-item" style="${isMe?'border-color:rgba(181,127,255,0.3);background:rgba(181,127,255,0.04)':''}">
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span class="tag ${f.type}">${f.type}</span>
+      </div>
+      <div class="lf-meta">
+        <div class="lf-top">
+          <span class="lf-user">${isMe?'You':f.userId}</span>
+          <span class="lf-subj">${f.subjectName}</span>
+          ${isMe?'<span style="font-size:9px;color:var(--a5);background:rgba(181,127,255,0.12);padding:1px 5px;border-radius:4px">mine</span>':''}
+        </div>
+        <div class="lf-note">${f.note||f.lecture||lbls[f.type]}</div>
+      </div>
+      <div class="lf-time">${fmtTime(f.time)}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateMyFeed(){
+  const list=document.getElementById('my-fb-list');
+  const mine=allFeedback.filter(f=>f.userId===MY_ID).sort((a,b)=>b.time-a.time).slice(0,8);
+  if(!mine.length){list.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">You haven\'t sent any feedback yet. Go to the Feedback tab!</div>';return;}
+  list.innerHTML=mine.map(f=>`
+    <div class="my-fb-item">
+      <div class="my-fb-top">
+        <span class="tag ${f.type}">${f.type}</span>
+        <span class="lf-subj">${f.subjectName}</span>
+        <span class="mf-time">${fmtTime(f.time)}</span>
+      </div>
+      <div class="my-fb-note">${f.lecture}${f.note?' — '+f.note:''}</div>
+    </div>`).join('');
+}
+
+function updateHomeStats(){
+  document.getElementById('h-total').textContent=allFeedback.length;
+  document.getElementById('h-subjs').textContent=subjects.length;
+  const total=allFeedback.length||1;
+  const u=allFeedback.filter(f=>f.type==='understood').length;
+  document.getElementById('h-score').textContent=allFeedback.length?Math.round(u/total*100)+'%':'–';
+}
+
+function renderSubjects(){
+  const list=document.getElementById('subj-list');
+  list.innerHTML=subjects.length?subjects.map(s=>`
+    <div class="subj-item">
+      <div>
+        <div class="subj-name">${s.name}</div>
+        <div class="subj-lec">${s.lectures.length} lecture${s.lectures.length!==1?'s':''}</div>
+      </div>
+      <button class="subj-del" onclick="delSubject('${s.id}')">Remove</button>
+    </div>`).join(''):'<div style="font-size:12px;color:var(--muted);padding:8px 0">No subjects yet. Add one below!</div>';
+  renderLecManager();
+}
+
+function addSubject(){
+  const inp=document.getElementById('new-subj');
+  const name=inp.value.trim();
+  if(!name){showToast('Enter a subject name','var(--a4)');return;}
+  const id='s'+Date.now();
+  subjects.push({id,name,lectures:['Lecture 1 – Introduction']});
+  inp.value='';save();renderSubjects();updateHomeStats();
+  showToast('Subject added!','var(--a3)');
+}
+
+function delSubject(id){
+  subjects=subjects.filter(s=>s.id!==id);
+  save();renderSubjects();updateHomeStats();
+}
+
+function renderLecManager(){
+  const wrap=document.getElementById('lec-manager');
+  if(!subjects.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--soft);margin-bottom:10px">Manage Lectures</div>`+
+  subjects.map(s=>`
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:500;color:var(--a5);margin-bottom:6px">${s.name}</div>
+      ${s.lectures.map((l,i)=>`
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <div style="flex:1;font-size:12px;color:var(--soft);padding:9px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px">${l}</div>
+          <button onclick="delLecture('${s.id}',${i})" style="padding:6px 10px;background:rgba(247,95,122,0.1);border:1px solid rgba(247,95,122,0.2);border-radius:7px;color:var(--a4);font-size:11px;cursor:pointer;min-height:36px;font-family:var(--font)">✕</button>
+        </div>`).join('')}
+      <div class="add-subj-row">
+        <input class="styled-input" id="nl-${s.id}" placeholder="Add lecture..." style="font-size:13px"/>
+        <button class="add-btn" onclick="addLecture('${s.id}')" style="font-size:12px;padding:8px 12px">Add</button>
+      </div>
+    </div>`).join('');
+}
+
+function addLecture(sid){
+  const inp=document.getElementById('nl-'+sid);
+  const name=inp.value.trim();
+  if(!name)return;
+  const s=subjects.find(x=>x.id===sid);
+  if(s){s.lectures.push(name);inp.value='';save();renderLecManager();}
+}
+function delLecture(sid,idx){
+  const s=subjects.find(x=>x.id===sid);
+  if(s&&s.lectures.length>1){s.lectures.splice(idx,1);save();renderLecManager();}
+  else showToast('Need at least 1 lecture','var(--a4)');
+}
+
+function showToast(msg,color){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=color||'var(--a2)';
+  t.style.color='#fff';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function connectFb(){
+  const k=document.getElementById('cfg-key').value.trim();
+  const u=document.getElementById('cfg-url').value.trim();
+  if(!k||!u){showToast('Fill in API Key and Database URL','var(--a4)');return;}
+  fbConnected=true;
+  document.getElementById('fb-st').className='fb-status conn';
+  document.getElementById('fb-st').textContent='● Connected';
+  showToast('Firebase connected! 🔥','var(--a3)');
+}
+
+function loadDemo(){
+  const types=['understood','confused','doubt','lost','understood','understood','confused','doubt','understood','lost'];
+  const sids=['s1','s1','s2','s2','s3','s3','s1','s2','s3','s1'];
+  const lis=[0,1,0,2,1,2,2,1,0,0];
+  const notes=['Very clear explanation!','Can you repeat the last part?','What is the time complexity?','','The recursion example was great','','I don\'t follow this algorithm','Merge sort step confusing','','Please slow down'];
+  const userIds=['user_abc123','user_def456','user_ghi789',MY_ID,'user_abc123','user_def456',MY_ID,'user_ghi789','user_abc123',MY_ID];
+  allFeedback=[];
+  const now=Date.now();
+  types.forEach((type,i)=>{
+    const sid=sids[i];
+    const subj=subjects.find(s=>s.id===sid)||subjects[0];
+    const li=Math.min(lis[i],subj.lectures.length-1);
+    allFeedback.push({id:'demo_'+i,type,note:notes[i],subjectId:sid,subjectName:subj.name,lecture:subj.lectures[li],userId:userIds[i],time:now-(types.length-i)*50000});
+  });
+  save();showToast('Demo data loaded! Go to Dashboard','var(--a1)');updateHomeStats();
+}
+
+setInterval(()=>{
+  if(document.getElementById('page-dashboard').classList.contains('active'))updateDashboard();
+},4000);
+
+updateHomeStats();
+</script>
+</body>
+</html>
